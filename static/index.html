@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>hao123</title>
+  </head>
+  <style>
+    body{
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <body>
+      <canvas id="c" style="background:#040404"></canvas>
+    <!-- built files will be auto injected -->
+  </body>
+  <script>
+    "use strict"
+    var Num = 80;
+    var points = [];
+    var c = document.getElementById('c');
+    var ctx = c.getContext('2d');
+    var w = c.width = window.screen.availWidth;
+    var h = c.height = document.body.clientHeight;
+    var point = function() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.color = Math.random() * 360;
+        this.count = 5;
+        this.mindis = 100;
+        this.speedx = Math.random() * 2 - 1;
+        this.speedy = Math.random() * 2 - 1;
+        //this.bound=false;
+    }
+    point.prototype.constructor = point;
+    point.prototype.lineTo = function(points) {
+        ctx.beginPath();
+        for (var i in points) {
+            var dis = Math.sqrt(Math.pow((this.x - points[i].x), 2) + Math.pow((this.y - points[i].y), 2));
+            if (this.count > 0 && points[i].count > 0 && dis < this.mindis) {
+                var grd = ctx.createLinearGradient(this.x, this.y, points[i].x, points[i].y);
+                var o = dis * 0.8 / this.mindis + 0.2;
+                grd.addColorStop(0, "hsla(" + this.color + ",100%,50%," + o + ")");
+                grd.addColorStop(1, "hsla(" + points[i].color + ",100%,50%," + o + ")");
+                ctx.strokeStyle = grd;
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(points[i].x, points[i].y);
+                ctx.stroke();
+                this.count--;
+                points[i].count--;
+            }
+        }
+        ctx.closePath();
+    };
+    point.prototype.init = function() {
+
+        this.x += this.speedx;
+        this.y += this.speedy;
+        this.count = 6;
+    };
+    point.prototype.isBound = function() {
+
+        if (this.x < 0 || this.x > w) {
+            //this.bound=true;
+            this.speedx = -this.speedx;
+
+        } else if (this.y < 0 || this.y > h) {
+            this.speedy = -this.speedy;
+        }
+    };
+    (function createPoints() {
+        for (var i = 0; i < Num; i++) {
+            points.push(new point());
+        }
+    })();
+
+    function drawPoints() {
+        ctx.clearRect(0, 0, w, h);
+        for (var i in points) {
+            var p = points[i];
+            //if(!parseInt(Math.random()*4,10)){
+            //	p.init();
+            //}	
+            p.isBound();
+            p.init();
+            //p.count=5;
+            ctx.fillStyle = "hsla(" + p.color + ",100%,50%,1)";
+            ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
+            p.lineTo(points);
+        }
+    }
+
+    setInterval(drawPoints, 100)
+  </script>
+</html>
